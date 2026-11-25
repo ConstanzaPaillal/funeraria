@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}{% if propio %}Mi perfil{% else %}Perfil de {{ persona.get_full_name|default:persona.username }}{% endif %}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{% if propio %}Mi perfil{% else %}Perfil de {{ persona.get_full_name|default:persona.username }}{% endif %}</h1>
+  <p>Usuario: {{ persona.username }}{% if propio %} · Rol: {{ rol_texto }}{% endif %}</p></div>
+  {% if propio %}<a class="btn btn-secondary" href="{% url 'perfil_clave' %}">Cambiar contraseña</a>
+  {% else %}<a class="btn btn-secondary" href="{% url 'usuario_list' %}">Volver a usuarios</a>{% endif %}</div>
+<section class="card wide-form">
+  <form method="post" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="aviso aviso--crit" role="alert" style="margin-bottom:16px">{% icono 'crit' 18 %}<div>{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div></div>{% endif %}
+    <div class="form-grid">
+      {% for field in form %}<div>{% include "servicios/_campo.html" %}</div>{% endfor %}
+      {% if rol_form %}{% for field in rol_form %}<div>{% include "servicios/_campo.html" %}</div>{% endfor %}{% endif %}
+    </div>
+    <div class="actions" style="margin-top:16px"><button class="btn" type="submit">Guardar</button></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% if t.estado == 'programado' %}
+  <form method="post" action="{% url 'traslado_estado' t.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="accion" value="iniciar"><input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-sm" type="submit">Iniciar traslado</button></form>
+{% elif t.estado == 'en_camino' %}
+  <div class="actions">
+    <form method="post" action="{% url 'traslado_estado' t.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="accion" value="completar"><input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-sm" type="submit">Marcar completado</button></form>
+    <form method="post" action="{% url 'traslado_estado' t.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="accion" value="retraso"><input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-sm btn-secondary" type="submit">Reportar retraso</button></form>
+  </div>
+{% elif t.estado == 'retrasado' %}
+  <form method="post" action="{% url 'traslado_estado' t.pk %}" class="inline">{% csrf_token %}<input type="hidden" name="accion" value="completar"><input type="hidden" name="next" value="{{ request.path }}"><button class="btn btn-sm" type="submit">Marcar completado</button></form>
+{% else %}<span class="muted">Sin acciones</span>{% endif %}

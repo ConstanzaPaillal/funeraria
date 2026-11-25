@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Movimientos de bodega{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Movimientos de bodega</h1><p>Historial de entradas y salidas.</p></div>
+  <a class="btn btn-secondary" href="{% url 'articulo_list' %}">Volver al inventario</a></div>
+<div class="table-wrap" role="region" aria-label="Movimientos de bodega" tabindex="0"><table>
+  <caption class="sr-only">Movimientos de bodega</caption>
+  <thead><tr><th scope="col">Fecha</th><th scope="col">Artículo</th><th scope="col">Tipo</th><th scope="col" class="num">Cantidad</th><th scope="col">Motivo</th><th scope="col">Registrado por</th></tr></thead>
+  <tbody>
+  {% for m in object_list %}
+    <tr><td>{{ m.creado|date:"j M Y · H:i" }}</td><td>{{ m.articulo.nombre }}</td><td>{{ m.get_tipo_display }}</td><td class="num">{{ m.cantidad }}</td><td>{{ m.motivo|default:"—" }}</td><td>{{ m.usuario.get_full_name|default:m.usuario.username|default:"—" }}</td></tr>
+  {% empty %}<tr><td colspan="6" class="empty">Todavía no hay movimientos.</td></tr>{% endfor %}
+  </tbody></table></div>
+{% include "servicios/_paginacion.html" %}
+{% endblock %}

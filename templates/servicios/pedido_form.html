@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ titulo }}</h1></div>
+<section class="card wide-form">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if formset.non_form_errors %}
+      <div class="aviso aviso--crit" role="alert" style="margin-bottom:16px">{% icono 'crit' 18 %}<div>{% for e in formset.non_form_errors %}<p>{{ e }}</p>{% endfor %}</div></div>
+    {% endif %}
+    {% for field in form %}{% include "servicios/_campo.html" %}{% endfor %}
+    <h2 style="margin-top:24px">Materiales</h2>
+    <p class="muted">Agrega los materiales del pedido. Marca «Eliminar» en una fila para quitarla.</p>
+    {{ formset.management_form }}
+    {% for f in formset %}
+      <div class="formset-row">
+        {% for field in f.visible_fields %}{% if field.name != 'DELETE' %}{% include "servicios/_campo.html" %}{% endif %}{% endfor %}
+        {% for field in f.visible_fields %}{% if field.name == 'DELETE' %}<div class="check">{{ field }}<label for="{{ field.id_for_label }}">Eliminar</label></div>{% endif %}{% endfor %}
+        {% for h in f.hidden_fields %}{{ h }}{% endfor %}
+      </div>
+    {% endfor %}
+    <div class="actions" style="margin-top:16px">
+      <button class="btn" type="submit">Crear pedido</button>
+      <a class="btn btn-secondary" href="{% url 'pedido_list' %}">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% load cristorey_tags %}
+<div class="field {% if field.errors %}has-error{% endif %}">
+  <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="muted" style="font-weight:400">(obligatorio)</span>{% endif %}</label>
+  {{ field }}
+  {% if field.help_text %}<span class="hint" id="h-{{ field.id_for_label }}">{{ field.help_text }}</span>{% endif %}
+  {% for e in field.errors %}<p class="error" role="alert">{% icono 'crit' 16 %}<span>{{ e }}</span></p>{% endfor %}
+</div>

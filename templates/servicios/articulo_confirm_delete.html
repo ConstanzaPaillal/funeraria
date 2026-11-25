@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Eliminar artículo{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>¿Eliminar el artículo?</h1>
+  <p>Vas a eliminar <strong>{{ object }}</strong> y sus fotos. Esta acción no se puede deshacer.</p>
+  <p class="muted">Si el artículo ya tiene movimientos, pedidos o ventas no se podrá eliminar: en ese caso desmarca «mostrar en el sitio público» para dejar de ofrecerlo.</p>
+  <form method="post" class="actions">{% csrf_token %}
+    <button class="btn" type="submit">Sí, eliminar</button>
+    <a class="btn btn-secondary" href="{% url 'articulo_list' %}">Cancelar</a>
+  </form>
+</section>
+{% endblock %}

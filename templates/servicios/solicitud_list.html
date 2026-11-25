@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Solicitudes{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Solicitudes</h1><p>Busca por persona, fecha, servicio o responsable. {{ total }} resultado{{ total|pluralize }}.</p></div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'solicitud_export' %}{% if querystring %}?{{ querystring }}{% endif %}">Descargar Excel{% if hay_filtros %} (con estos filtros){% endif %}</a>
+    <a class="btn" href="{% url 'solicitud_create' %}">Nueva solicitud</a></div></div>
+
+<form method="get" class="filters filters--wide" role="search" aria-label="Buscador de solicitudes">
+  <div class="field"><label for="q">Persona, código, familiar o teléfono</label><input id="q" type="search" name="q" value="{{ f.q }}" autocomplete="off" placeholder="Ej.: Rojas, CR-0003 o 0142"></div>
+  <div class="field"><label for="estado">Estado</label>
+    <select id="estado" name="estado"><option value="">Todos</option>
+      {% for k, l in estados %}<option value="{{ k }}"{% if f.estado == k %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="servicio">Tipo de servicio</label>
+    <select id="servicio" name="servicio"><option value="">Todos</option>
+      {% for k, l in servicios %}<option value="{{ k }}"{% if f.servicio == k %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="responsable">Responsable</label>
+    <select id="responsable" name="responsable"><option value="">Todos</option>
+      {% for u in responsables %}<option value="{{ u.pk }}"{% if f.responsable == u.pk|stringformat:"s" %} selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="etiqueta">Etiqueta</label>
+    <select id="etiqueta" name="etiqueta"><option value="">Todas</option>
+      {% for e in etiquetas %}<option value="{{ e.pk }}"{% if f.etiqueta == e.pk|stringformat:"s" %} selected{% endif %}>{{ e.nombre }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="desde">Ceremonia desde</label><input id="desde" type="date" name="desde" value="{{ f.desde }}"></div>
+  <div class="field"><label for="hasta">Ceremonia hasta</label><input id="hasta" type="date" name="hasta" value="{{ f.hasta }}"></div>
+  <div class="actions filters-actions"><button class="btn" type="submit">Buscar</button>{% if hay_filtros %}<a class="btn btn-secondary" href="{% url 'solicitud_list' %}">Limpiar</a>{% endif %}</div>
+</form>
+
+<div class="table-wrap" role="region" aria-label="Listado de solicitudes" tabindex="0"><table class="expandible">
+  <caption class="sr-only">Listado de solicitudes. Usa «Ver datos» para desplegar el detalle de cada fila.</caption>
+  <thead><tr><th scope="col"><span class="sr-only">Desplegar</span></th><th scope="col">Código</th><th scope="col">Fallecido/a</th><th scope="col">Servicio</th><th scope="col">Ceremonia</th><th scope="col">Estado</th><th scope="col">Responsable</th></tr></thead>
+  <tbody>
+  {% for s in object_list %}
+    <tr class="fila">
+      <td><button type="button" class="btn btn-sm btn-secondary toggle" aria-expanded="false" aria-controls="det-{{ s.pk }}" data-abrir="Ver datos" data-cerrar="Ocultar">Ver datos</button></td>
+      <td><a href="{% url 'solicitud_detail' s.pk %}"><strong>{{ s.codigo }}</strong></a></td>
+      <td>{{ s.fallecido }}<small>{{ s.contacto_nombre }}</small>{% for e in s.etiquetas.all %}{% include "servicios/_etiqueta.html" %}{% endfor %}</td><td>{{ s.get_tipo_servicio_display }}</td>
+      <td>{{ s.ceremonia_inicio|date:"D j M · H:i" }}</td><td>{% insignia s.estado %}</td>
+      <td>{{ s.responsable.get_full_name|default:s.responsable.username|default:"—" }}</td></tr>
+    <tr class="detalle" id="det-{{ s.pk }}" hidden><td colspan="7">
+      <div class="detalle-grid">
+        <dl class="data">
+          <dt>Fallecido/a</dt><dd>{{ s.fallecido }}</dd>
+          <dt>Familiar de contacto</dt><dd>{{ s.contacto_nombre }} · {{ s.contacto_telefono }}{% if s.contacto_email %}<br>{{ s.contacto_email }}{% endif %}</dd>
+          <dt>Lugar de la ceremonia</dt><dd>{{ s.lugar_ceremonia }}</dd>
+          <dt>Velatorio</dt><dd>{% if s.sala %}{{ s.sala }} · {{ s.velatorio_inicio|date:"j M H:i" }} a {{ s.velatorio_fin|date:"j M H:i" }}{% else %}Sin sala reservada{% endif %}</dd>
+          <dt>Etapa</dt><dd>{{ s.etapa_texto }}</dd>
+          <dt>Documentos</dt><dd>{% if s.documentos_pendientes %}Faltan: {% for d in s.documentos_pendientes %}{{ d.get_tipo_display }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}Completos{% endif %}</dd>
+        </dl>
+        <dl class="data">
+          <dt>A cargo</dt><dd>{{ s.responsable.get_full_name|default:s.responsable.username|default:"Sin asignar" }}</dd>
+          <dt>Féretro</dt><dd>{% if s.feretro %}{{ s.feretro.nombre }} ({{ s.feretro.get_gama_display }}) · {{ s.precio_feretro|clp }}{% else %}Aún sin elegir{% endif %}</dd>
+          <dt>Precio del servicio</dt><dd>{{ s.precio_servicio|clp }}</dd>
+          <dt>Total referencial</dt><dd><strong>{{ s.total_referencial|clp }}</strong></dd>
+          <dt>Facturado</dt><dd>{{ s.facturado|clp }}</dd>
+          <dt>Abonado / saldo</dt><dd>{{ s.abonado|clp }} · saldo {{ s.saldo|clp }}</dd>
+        </dl>
+      </div>
+      <div class="actions"><a class="btn btn-sm" href="{% url 'solicitud_detail' s.pk %}">Abrir solicitud</a>
+        <a class="btn btn-sm btn-secondary" href="{% url 'venta_create' s.pk %}">Registrar venta</a></div>
+    </td></tr>
+  {% empty %}<tr><td colspan="7" class="empty">Ninguna solicitud coincide con la búsqueda.</td></tr>{% endfor %}
+  </tbody></table></div>
+{% include "servicios/_paginacion.html" %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Ir a Webpay{% endblock %}
+{% block content %}
+<section class="card narrow center">
+  <h1>Pago con Webpay</h1>
+  <p>Vas a pasar al sitio seguro de Transbank para pagar el abono de la solicitud <strong>{{ solicitud.codigo }}</strong>.</p>
+  <form method="post" action="{{ url }}" data-no-ajax data-autoenviar>
+    <input type="hidden" name="token_ws" value="{{ token }}">
+    <button class="btn" type="submit">Continuar a Webpay</button>
+  </form>
+  <p class="muted" style="margin-top:16px">Si no avanza solo, presiona el botón.</p>
+</section>
+{% endblock %}

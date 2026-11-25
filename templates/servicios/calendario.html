@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Calendario{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Calendario</h1><p>{% if solo_chofer %}Tus traslados del mes.{% else %}Ceremonias, velatorios y traslados. {{ total }} evento{{ total|pluralize }} en la vista.{% endif %}</p></div></div>
+
+<div class="cal-bar">
+  <div class="actions">
+    <a class="btn btn-secondary" href="?mes={{ prev }}&tipo={{ tipo }}" aria-label="Mes anterior">← Anterior</a>
+    <a class="btn btn-secondary" href="?mes={{ mes_actual }}&tipo={{ tipo }}">Hoy</a>
+    <a class="btn btn-secondary" href="?mes={{ sig }}&tipo={{ tipo }}" aria-label="Mes siguiente">Siguiente →</a>
+  </div>
+  <h2 class="cal-titulo" aria-live="polite">{{ titulo_mes }}</h2>
+  {% if not solo_chofer %}
+  <nav aria-label="Filtrar por tipo" class="chips">
+    {% for k, l in tipos %}<a class="chip" href="?mes={{ mes }}&tipo={{ k }}" data-k="{{ k }}"{% if tipo == k %} aria-current="true"{% endif %}>{{ l }}</a>{% endfor %}
+  </nav>
+  {% endif %}
+</div>
+
+<div class="table-wrap cal-wrap"><table class="cal">
+  <caption class="sr-only">{{ titulo_mes }}</caption>
+  <thead><tr>{% for d in dias %}<th scope="col"><span class="d-largo">{{ d }}</span><span class="d-corto" aria-hidden="true">{{ d|slice:":3" }}</span></th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for semana in grilla %}<tr>
+    {% for dia in semana %}
+      <td class="{% if not dia.en_mes %}fuera{% endif %}{% if dia.hoy %} hoy{% endif %}{% if not dia.eventos %} vacio{% endif %}">
+        <div class="cal-dia"><span class="cal-num">{{ dia.fecha.day }}</span><span class="cal-fecha">{{ dia.fecha|date:"l j \d\e F" }}</span>{% if dia.hoy %}<span class="cal-hoy">Hoy</span>{% endif %}</div>
+        {% for e in dia.eventos %}
+          <a class="ev ev--{{ e.clase }}" href="{{ e.url }}"><span class="ev-tipo">{{ e.rotulo }} · {{ e.hora }}</span><span class="ev-txt">{{ e.texto }}</span></a>
+        {% endfor %}
+      </td>
+    {% endfor %}</tr>
+  {% endfor %}
+  </tbody></table></div>
+
+<ul class="cal-leyenda" aria-label="Leyenda"><li><span class="ev-muestra ev--ceremonia"></span>Ceremonia</li><li><span class="ev-muestra ev--velatorio"></span>Velatorio</li><li><span class="ev-muestra ev--traslado"></span>Traslado</li></ul>
+{% endblock %}

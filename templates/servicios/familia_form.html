@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Consulta de la familia{% endblock %}
+{% block content %}
+<div class="narrow" style="margin:0 auto">
+  <h1>Acompañamiento a la familia</h1>
+  <p class="muted">Ingrese el código que le entregó nuestro equipo para ver cómo avanza el servicio.</p>
+  <section class="card" aria-label="Consulta">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}{% include "servicios/_campo.html" %}{% endfor %}
+      <div class="actions"><button class="btn" type="submit">Ver el servicio</button>
+        <a class="btn btn-secondary" href="{% if user.is_authenticated %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}">Volver</a></div>
+    </form>
+  </section>
+  <p class="muted" style="margin-top:16px">Si no tiene el código o necesita ayuda, llámenos al +56 45 255 0100.</p>
+</div>
+{% endblock %}

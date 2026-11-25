@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Panel{% endblock %}
+{% block content %}
+
+{% if panel == 'sin_rol' %}
+  <div class="page-head"><h1>Panel</h1></div>
+  <div class="aviso aviso--warn" role="alert">{% icono 'warn' 18 %}<div><p>Tu usuario todavía no tiene un rol asignado. Pídele al administrador que te asigne uno.</p></div></div>
+{% else %}
+
+<div class="page-head"><div>
+  <h1>{% if panel == 'admin' %}Panel general{% elif panel == 'chofer' %}Mis traslados de hoy{% elif panel == 'bodega' %}Panel de bodega{% else %}Mi panel{% endif %}</h1>
+  <p>{% if panel == 'admin' %}Resumen de la operación de hoy.{% elif panel == 'recepcion' %}Tus solicitudes en curso.{% elif panel == 'bodega' %}Stock y pedidos pendientes.{% else %}Actualiza el estado a medida que avanzas.{% endif %}</p>
+</div></div>
+
+<div class="stack">
+  <ul class="stats">{% for n, etiqueta in stats %}<li class="stat"><b>{{ n }}</b><span>{{ etiqueta }}</span></li>{% endfor %}</ul>
+
+  {% if graficos %}
+  <section aria-labelledby="h-graf"><h2 id="h-graf" class="sr-only">Gráficos</h2>
+    <div class="grid grid-2 graficos">{% for g in graficos %}{% include "servicios/_grafico.html" %}{% endfor %}</div></section>
+  {% endif %}
+
+  {% if panel == 'admin' or panel == 'recepcion' %}
+  <section class="stack" style="gap:8px" aria-labelledby="h-atencion">
+    <h2 id="h-atencion">{% if panel == 'recepcion' %}Mis solicitudes que requieren atención{% else %}Solicitudes que requieren atención{% endif %}</h2>
+    <div class="table-wrap" role="region" aria-label="Solicitudes que requieren atención" tabindex="0"><table>
+      <caption class="sr-only">Solicitudes que requieren atención</caption>
+      <thead><tr><th scope="col">Código</th><th scope="col">Fallecido/a</th><th scope="col">Ceremonia</th><th scope="col">Estado</th></tr></thead>
+      <tbody>{% for s in atencion %}
+        <tr><td><a href="{% url 'solicitud_detail' s.pk %}"><strong>{{ s.codigo }}</strong></a></td><td>{{ s.fallecido }}</td><td>{{ s.ceremonia_inicio|date:"D j M · H:i" }}</td><td>{% insignia s.estado %}</td></tr>
+      {% empty %}<tr><td colspan="4" class="empty">Nada pendiente por ahora.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  {% endif %}
+
+  {% if panel == 'recepcion' %}
+  <section class="stack" style="gap:8px" aria-labelledby="h-prox">
+    <h2 id="h-prox">Mis próximas ceremonias</h2>
+    <div class="table-wrap" role="region" aria-label="Mis próximas ceremonias" tabindex="0"><table>
+      <caption class="sr-only">Mis próximas ceremonias</caption>
+      <thead><tr><th scope="col">Código</th><th scope="col">Fallecido/a</th><th scope="col">Ceremonia</th><th scope="col">Lugar</th></tr></thead>
+      <tbody>{% for s in proximas %}
+        <tr><td><a href="{% url 'solicitud_detail' s.pk %}"><strong>{{ s.codigo }}</strong></a></td><td>{{ s.fallecido }}</td><td>{{ s.ceremonia_inicio|date:"D j M · H:i" }}</td><td>{{ s.lugar_ceremonia }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="empty">No tienes ceremonias próximas.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  {% endif %}
+
+  {% if panel == 'admin' or panel == 'bodega' %}
+  <section class="stack" style="gap:8px" aria-labelledby="h-stock">
+    <h2 id="h-stock">Inventario en alerta</h2>
+    <div class="table-wrap" role="region" aria-label="Inventario en alerta" tabindex="0"><table>
+      <caption class="sr-only">Inventario en alerta</caption>
+      <thead><tr><th scope="col">Artículo</th><th scope="col" class="num">Stock / mínimo</th><th scope="col">Estado</th></tr></thead>
+      <tbody>{% for a in alertas %}
+        <tr><td><strong>{{ a.nombre }}</strong><small>{{ a.get_categoria_display }}</small></td><td class="num">{{ a.stock }} / {{ a.stock_minimo }}</td><td>{% insignia a.estado %}</td></tr>
+      {% empty %}<tr><td colspan="3" class="empty">Todo el inventario está en niveles normales.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  {% endif %}
+
+  {% if panel == 'bodega' %}
+  <section class="stack" style="gap:8px" aria-labelledby="h-ped">
+    <h2 id="h-ped">Pedidos pendientes</h2>
+    <div class="table-wrap" role="region" aria-label="Pedidos pendientes" tabindex="0"><table>
+      <caption class="sr-only">Pedidos pendientes</caption>
+      <thead><tr><th scope="col">Pedido</th><th scope="col">Para la ceremonia</th><th scope="col">Estado</th></tr></thead>
+      <tbody>{% for p in pendientes %}
+        <tr><td><strong>{{ p.codigo }}</strong><small>{{ p.solicitud.codigo }}</small></td><td>{{ p.solicitud.ceremonia_inicio|date:"D j M · H:i" }}</td><td>{% insignia p.estado %}</td></tr>
+      {% empty %}<tr><td colspan="3" class="empty">No hay pedidos pendientes.</td></tr>{% endfor %}</tbody>
+    </table></div>
+    <p><a class="btn btn-secondary" href="{% url 'pedido_list' %}">Ir a pedidos de bodega</a></p>
+  </section>
+  {% endif %}
+
+  {% if panel == 'admin' %}
+  <section class="stack" style="gap:8px" aria-labelledby="h-aus">
+    <h2 id="h-aus">Ausencias del personal</h2>
+    <div class="grid grid-2">
+      <div class="card"><h3>Por revisar</h3>
+        {% if ausencias_pendientes %}<ul class="mini-list">{% for a in ausencias_pendientes %}
+          <li class="apilado"><span><strong>{{ a.usuario.get_full_name|default:a.usuario.username }}</strong><br><span class="muted">{{ a.get_tipo_display }} · {{ a.desde|date:"j M" }} al {{ a.hasta|date:"j M" }}{% if a.motivo %} · {{ a.motivo }}{% endif %}</span></span>
+            {% include "servicios/_ausencia_decision.html" %}</li>{% endfor %}</ul>
+        {% else %}<p class="muted" style="margin:0">No hay solicitudes por revisar.</p>{% endif %}</div>
+      <div class="card"><h3>Ausentes hoy y próximos 14 días</h3>
+        <ul class="mini-list">
+          {% for a in ausentes_hoy %}<li><span><strong>{{ a.usuario.get_full_name|default:a.usuario.username }}</strong><br><span class="muted">{{ a.get_tipo_display }} · hasta el {{ a.hasta|date:"j M" }}</span></span>{% insignia 'ausente' %}</li>{% endfor %}
+          {% for a in ausencias_proximas %}<li><span><strong>{{ a.usuario.get_full_name|default:a.usuario.username }}</strong><br><span class="muted">{{ a.get_tipo_display }} · {{ a.desde|date:"j M" }} al {{ a.hasta|date:"j M" }}</span></span></li>{% endfor %}
+          {% if not ausentes_hoy and not ausencias_proximas %}<li class="muted">Nadie ausente por ahora.</li>{% endif %}
+        </ul></div>
+    </div>
+    <p><a class="btn btn-secondary" href="{% url 'ausencia_list' %}">Gestionar ausencias</a></p>
+  </section>
+
+  <section class="stack" style="gap:8px" aria-labelledby="h-tr">
+    <h2 id="h-tr">Traslados de hoy</h2>
+    <div class="table-wrap" role="region" aria-label="Traslados de hoy" tabindex="0"><table>
+      <caption class="sr-only">Traslados de hoy</caption>
+      <thead><tr><th scope="col">Código</th><th scope="col">Hora</th><th scope="col">Ruta</th><th scope="col">Chofer</th><th scope="col">Estado</th></tr></thead>
+      <tbody>{% for t in traslados_hoy %}
+        <tr><td><strong>{{ t.codigo }}</strong></td><td>{{ t.inicio|date:"H:i" }}</td><td>{{ t.ruta }}</td><td>{{ t.chofer.get_full_name|default:t.chofer.username }}</td><td>{% insignia t.estado %}</td></tr>
+      {% empty %}<tr><td colspan="5" class="empty">No hay traslados programados hoy.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  {% endif %}
+
+  {% if panel == 'chofer' %}
+  <div class="grid grid-2">
+    {% for t in traslados %}{% include "servicios/_traslado_card.html" %}
+    {% empty %}<p class="empty card">No tienes traslados para hoy.</p>{% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

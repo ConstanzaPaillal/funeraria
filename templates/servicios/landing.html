@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Servicios funerarios{% endblock %}
+{% block content %}
+<div class="lp">
+  <section class="lp-hero" aria-labelledby="lp-h1">
+    <p class="lp-kicker">Funeraria Cristo Rey · Temuco</p>
+    <h1 id="lp-h1">Acompañamos a su familia con respeto, cercanía y claridad</h1>
+    <p class="lp-lead">En un momento difícil, usted no tiene que decidir solo. Le orientamos en cada paso y le informamos con transparencia qué incluye cada servicio y cuánto cuesta.</p>
+    <div class="actions">
+      <a class="btn lp-cta" href="tel:{{ empresa.telefono|cut:' ' }}">Llámenos: {{ empresa.telefono }}</a>
+      <a class="btn btn-secondary" href="#feretros">Ver féretros y urnas</a>
+      <a class="btn btn-secondary" href="{% url 'familia' %}">Seguir el avance de un servicio</a>
+    </div>
+  </section>
+
+  {% if tarifas %}
+  <section class="lp-sec" aria-labelledby="lp-serv">
+    <h2 id="lp-serv">Nuestros servicios</h2>
+    <p class="muted">Valores referenciales en pesos chilenos, IVA incluido. Cada familia es distinta: le armamos el servicio según lo que necesite.</p>
+    <ul class="lp-servicios">
+      {% for t in tarifas %}<li><span>{{ t.get_tipo_servicio_display }}</span><strong>desde {{ t.precio|clp }}</strong></li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section class="lp-sec" id="feretros" aria-labelledby="lp-fer">
+    <h2 id="lp-fer">Féretros</h2>
+    <p class="muted">Tres gamas para elegir con tranquilidad.</p>
+    <div class="lp-grid">
+      {% for a in feretros %}
+      <article class="prod card">
+        <div class="prod-ilus">{% if a.imagen %}<img src="{{ a.imagen.url }}" alt="{{ a.nombre }}" loading="lazy">{% else %}{% include "servicios/_ilus_feretro.html" with gama=a.gama %}{% endif %}</div>
+        <p class="prod-gama">{{ a.get_gama_display|default:"Féretro" }}</p>
+        <h3>{{ a.nombre }}</h3>
+        <p class="muted">{{ a.descripcion }}</p>
+        <p class="prod-precio">{{ a.precio|clp }} <span class="muted">IVA incluido</span></p>
+      </article>
+      {% empty %}<p class="muted">Pronto publicaremos nuestro catálogo de féretros. Mientras tanto, llámenos y le asesoramos.</p>{% endfor %}
+    </div>
+  </section>
+
+  <section class="lp-sec" aria-labelledby="lp-urn">
+    <h2 id="lp-urn">Urnas</h2>
+    <p class="muted">Para quienes eligen la cremación o desean conservar las cenizas.</p>
+    <div class="lp-grid">
+      {% for a in urnas %}
+      <article class="prod card">
+        <div class="prod-ilus">{% if a.imagen %}<img src="{{ a.imagen.url }}" alt="{{ a.nombre }}" loading="lazy">{% else %}{% include "servicios/_ilus_urna.html" %}{% endif %}</div>
+        <h3>{{ a.nombre }}</h3>
+        <p class="muted">{{ a.descripcion }}</p>
+        <p class="prod-precio">{{ a.precio|clp }} <span class="muted">IVA incluido</span></p>
+      </article>
+      {% empty %}<p class="muted">Pronto publicaremos nuestro catálogo de urnas.</p>{% endfor %}
+    </div>
+  </section>
+
+  <section class="lp-sec lp-contacto" aria-labelledby="lp-con">
+    <h2 id="lp-con">¿Necesita ayuda ahora?</h2>
+    <p>Nuestro equipo de recepción le atenderá y le explicará los pasos, los documentos y los plazos.</p>
+    <dl class="data">
+      <dt>Teléfono</dt><dd><a href="tel:{{ empresa.telefono|cut:' ' }}">{{ empresa.telefono }}</a></dd>
+      <dt>Dirección</dt><dd>{{ empresa.direccion }}</dd>
+    </dl>
+    <p class="muted lp-nota">Los precios son referenciales y pueden variar según la disponibilidad. Recepción confirma el valor final al contratar el servicio.</p>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Flota{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Flota</h1><p>Vehículos de la funeraria y su disponibilidad.</p></div>
+  <a class="btn" href="{% url 'vehiculo_create' %}">Nuevo vehículo</a></div>
+<div class="grid grid-2">
+{% for v in object_list %}
+  <article class="card"><div class="card-head"><h2>{{ v.nombre }}</h2>{% insignia v.estado %}</div>
+    <p class="muted">{{ v.get_tipo_display }} · Patente {{ v.patente }}</p>
+    <a class="btn btn-secondary" href="{% url 'vehiculo_edit' v.pk %}">Editar o cambiar estado</a></article>
+{% empty %}<p class="empty card">No hay vehículos registrados.</p>{% endfor %}
+</div>
+{% endblock %}

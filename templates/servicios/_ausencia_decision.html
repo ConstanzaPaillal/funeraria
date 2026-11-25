@@ -1,0 +1,7 @@
+<form method="post" action="{% url 'ausencia_resolver' a.pk %}" class="decision">{% csrf_token %}
+  <input type="hidden" name="volver" value="{{ request.get_full_path }}">
+  <label class="sr-only" for="com-{{ a.pk }}">Comentario (opcional)</label>
+  <input id="com-{{ a.pk }}" type="text" name="comentario" maxlength="200" placeholder="Comentario (opcional)">
+  <div class="actions"><button class="btn btn-sm" type="submit" name="accion" value="aprobar">Aprobar</button>
+    <button class="btn btn-sm btn-secondary" type="submit" name="accion" value="rechazar">Rechazar</button></div>
+</form>

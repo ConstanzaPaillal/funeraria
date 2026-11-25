@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Inventario{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Inventario</h1><p>{% if en_alerta %}{{ en_alerta }} artículo{{ en_alerta|pluralize }} necesita{{ en_alerta|pluralize:",n" }} reposición.{% else %}Todo el inventario está en niveles normales.{% endif %}</p></div>
+  <div class="actions"><a class="btn" href="{% url 'articulo_create' %}">Nuevo artículo</a><a class="btn btn-secondary" href="{% url 'movimiento_list' %}">Historial de movimientos</a></div></div>
+<div class="table-wrap" role="region" aria-label="Inventario" tabindex="0"><table>
+  <caption class="sr-only">Inventario</caption>
+  <thead><tr><th scope="col">Artículo</th><th scope="col">Categoría</th><th scope="col" class="num">Precio</th><th scope="col" class="num">Stock</th><th scope="col" class="num">Mínimo</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+  <tbody>
+  {% for a in object_list %}
+    <tr><td>{% if a.imagen %}<img class="miniatura" src="{{ a.imagen.url }}" alt="" width="40" height="40">{% endif %}<strong>{{ a.nombre }}</strong>{% if a.medidas %}<small>{{ a.medidas }}</small>{% endif %}</td><td>{{ a.get_categoria_display }}{% if a.gama %}<small>{{ a.get_gama_display }}</small>{% endif %}</td><td class="num">{% if a.precio %}{{ a.precio|clp }}{% else %}—{% endif %}</td><td class="num">{{ a.stock }} {{ a.unidad }}</td><td class="num">{{ a.stock_minimo }}</td><td>{% insignia a.estado %}</td>
+      <td><div class="actions">
+        <a class="btn btn-sm" href="{% url 'movimiento_create' %}?articulo={{ a.pk }}&tipo=entrada">Registrar entrada</a>
+        <a class="btn btn-sm btn-secondary" href="{% url 'movimiento_create' %}?articulo={{ a.pk }}&tipo=salida">Registrar salida</a>
+        <a class="btn btn-sm btn-secondary" href="{% url 'articulo_edit' a.pk %}">Editar</a>
+        <a class="btn btn-sm btn-secondary" href="{% url 'articulo_fotos' a.pk %}">Fotos</a>
+        <a class="btn btn-sm btn-secondary" href="{% url 'articulo_delete' a.pk %}">Eliminar</a></div></td></tr>
+  {% empty %}<tr><td colspan="7" class="empty">No hay artículos.</td></tr>{% endfor %}
+  </tbody></table></div>
+{% endblock %}

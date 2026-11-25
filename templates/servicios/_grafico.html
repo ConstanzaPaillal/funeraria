@@ -1,0 +1,21 @@
+<figure class="grafico card" aria-labelledby="g-{{ g.id }}">
+  <figcaption><h3 id="g-{{ g.id }}">{{ g.titulo }}</h3>{% if g.nota %}<p class="muted">{{ g.nota }}</p>{% endif %}</figcaption>
+  {% if g.sin_datos %}
+    <p class="muted grafico-vacio">Todavía no hay datos para mostrar.</p>
+  {% elif g.tipo == 'h' %}
+    <ul class="bars-h">
+    {% for f in g.filas %}
+      <li title="{{ f.etiqueta }}: {{ f.texto }}"><span class="b-et">{{ f.etiqueta }}</span>
+        <span class="b-pista" aria-hidden="true"><span class="b-barra tono-{{ f.tono }}" style="width:{{ f.pct }}%"></span>{% if f.marca %}<span class="b-min" style="left:{{ f.marca }}%"></span>{% endif %}</span>
+        <b class="b-val">{{ f.texto }}</b></li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <ul class="bars-v" tabindex="0" role="list" aria-label="{{ g.titulo }}">
+    {% for f in g.filas %}
+      <li title="{{ f.etiqueta }}: {{ f.texto }}"><b class="v-val">{% if f.valor %}<span aria-hidden="true">{{ f.corto }}</span><span class="sr-only">{{ f.texto }}</span>{% else %}<span class="muted">0</span>{% endif %}</b>
+        <span class="v-pista" aria-hidden="true"><span class="v-barra" style="height:{{ f.pct }}%"></span></span><span class="v-et">{{ f.etiqueta }}</span></li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+</figure>

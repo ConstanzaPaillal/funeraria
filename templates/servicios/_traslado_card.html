@@ -1,0 +1,7 @@
+{% load cristorey_tags %}
+<article class="card" aria-label="Traslado {{ t.codigo }}">
+  <div class="card-head"><h3>{{ t.codigo }} · {{ t.inicio|date:"H:i" }}</h3>{% insignia t.estado %}</div>
+  <p style="margin-bottom:8px"><strong>{{ t.ruta }}</strong></p>
+  <p class="muted">{{ t.vehiculo.nombre }} ({{ t.vehiculo.patente }}) · Solicitud {{ t.solicitud.codigo }}</p>
+  {% include "servicios/_traslado_acciones.html" %}
+</article>

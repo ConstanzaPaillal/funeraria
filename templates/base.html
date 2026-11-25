@@ -1,0 +1,84 @@
+{% load static cristorey_tags %}<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}Inicio{% endblock %} — Cristo Rey</title>
+  <link rel="stylesheet" href="{% static 'css/cristorey.css' %}">
+  <script src="{% static 'js/cristorey.js' %}" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<div id="cr-live" class="sr-only" role="status" aria-live="polite"></div>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="{% if user.is_authenticated %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}" aria-label="Cristo Rey, ir al inicio">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" focusable="false"><path d="M12 2h4v7h7v4h-7v13h-4V13H5V9h7z" fill="currentColor"/></svg>
+      <span class="brand-name">Cristo Rey<span class="brand-sub">Servicios funerarios</span></span>
+    </a>
+    {% if user.is_authenticated %}
+    <div class="who"><a href="{% url 'perfil' %}" style="color:inherit;text-decoration:none"><strong>{{ user.get_full_name|default:user.username }}</strong></a><span>{{ rol_texto }}</span></div>
+    <form method="post" action="{% url 'logout' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-ghost">Salir</button></form>
+    {% elif request.resolver_match.url_name != 'login' %}
+    <a class="btn-ghost" href="{% url 'login' %}">Ingreso del personal</a>
+    {% endif %}
+  </div>
+</header>
+
+<div class="shell {% if not user.is_authenticated %}shell--solo{% endif %}">
+  {% if user.is_authenticated %}
+  <nav class="menu" aria-label="Principal">
+    <ul>
+      <li><a href="{% url 'home' %}"{% if modulo == 'panel' %} aria-current="page"{% endif %}>Panel</a></li>
+      {% if es_recepcion %}
+        <li><a href="{% url 'solicitud_list' %}"{% if modulo == 'solicitudes' %} aria-current="page"{% endif %}>Solicitudes</a></li>
+        <li><a href="{% url 'sala_agenda' %}"{% if modulo == 'salas' %} aria-current="page"{% endif %}>Salas</a></li>
+      {% endif %}
+      {% if es_recepcion or es_chofer %}
+        <li><a href="{% url 'calendario' %}"{% if modulo == 'calendario' %} aria-current="page"{% endif %}>Calendario</a></li>
+      {% endif %}
+      {% if es_recepcion or es_chofer %}
+        <li><a href="{% url 'traslado_list' %}"{% if modulo == 'traslados' %} aria-current="page"{% endif %}>{% if es_recepcion %}Traslados{% else %}Mis traslados{% endif %}</a></li>
+      {% endif %}
+      {% if es_recepcion %}
+        <li><a href="{% url 'venta_list' %}"{% if modulo == 'ventas' %} aria-current="page"{% endif %}>Ventas</a></li>
+      {% endif %}
+      {% if es_recepcion or es_bodega %}
+        <li><a href="{% url 'precios' %}"{% if modulo == 'precios' %} aria-current="page"{% endif %}>Precios</a></li>
+      {% endif %}
+      {% if es_recepcion %}
+        <li><a href="{% url 'etiqueta_list' %}"{% if modulo == 'etiquetas' %} aria-current="page"{% endif %}>Etiquetas</a></li>
+      {% endif %}
+      {% if es_bodega %}
+        <li><a href="{% url 'articulo_list' %}"{% if modulo == 'inventario' %} aria-current="page"{% endif %}>Inventario</a></li>
+        <li><a href="{% url 'pedido_list' %}"{% if modulo == 'pedidos' %} aria-current="page"{% endif %}>Pedidos de bodega</a></li>
+      {% endif %}
+      {% if es_admin %}
+        <li><a href="{% url 'ausencia_list' %}"{% if modulo == 'ausencias' %} aria-current="page"{% endif %}>Ausencias</a></li>
+        <li><a href="{% url 'vehiculo_list' %}"{% if modulo == 'flota' %} aria-current="page"{% endif %}>Flota</a></li>
+        <li><a href="{% url 'usuario_list' %}"{% if modulo == 'usuarios' %} aria-current="page"{% endif %}>Usuarios y roles</a></li>
+        <li><a href="{% url 'actividad_list' %}"{% if modulo == 'actividad' %} aria-current="page"{% endif %}>Actividad</a></li>
+      {% endif %}
+      {% if not es_admin %}<li><a href="{% url 'ausencia_mias' %}"{% if modulo == 'ausencias' %} aria-current="page"{% endif %}>Mis ausencias</a></li>{% endif %}
+      {% if es_recepcion or es_bodega %}<li><a href="{% url 'catalogo' %}">Sitio público</a></li>{% endif %}
+      <li><a href="{% url 'perfil' %}"{% if modulo == 'perfil' %} aria-current="page"{% endif %}>Mi perfil</a></li>
+      {% if user.is_staff %}<li><a href="{% url 'admin:index' %}">Administración</a></li>{% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  <main id="main" tabindex="-1">
+    {% if messages %}
+    <div class="avisos" role="status">
+      {% for m in messages %}
+        <div class="aviso aviso--{{ m.tags|tono_mensaje }}">{% icono m.tags|tono_mensaje 18 %}<div><p>{{ m }}</p></div></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<p class="foot">Funeraria Cristo Rey · Sistema de gestión de servicios funerarios</p>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Usuarios y roles{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Usuarios y roles</h1><p>El alta de usuarios la hace solo el administrador, que asigna cada persona a un rol.</p></div>
+  <a class="btn" href="{% url 'usuario_create' %}">Nuevo usuario</a></div>
+<div class="stack">
+  <div class="table-wrap" role="region" aria-label="Usuarios del sistema" tabindex="0"><table>
+    <caption class="sr-only">Usuarios del sistema</caption>
+    <thead><tr><th scope="col">Nombre</th><th scope="col">Usuario</th><th scope="col">Rol</th><th scope="col">Estado</th><th scope="col">Acción</th></tr></thead>
+    <tbody>
+    {% for u in object_list %}
+      <tr><td><strong>{{ u.get_full_name|default:u.username }}</strong><small>{{ u.email }}</small></td><td>{{ u.username }}</td><td>{{ u.rol_texto }}</td>
+        <td>{% if u.is_active %}{% insignia 'activo' %}{% else %}{% insignia 'inactivo' %}{% endif %}</td>
+        <td>{% if u.pk == user.pk %}<span class="muted">No puedes desactivar tu propia cuenta</span>
+          {% else %}<form method="post" action="{% url 'usuario_toggle' u.pk %}" class="inline">{% csrf_token %}<button class="btn btn-sm btn-secondary" type="submit">{% if u.is_active %}Desactivar{% else %}Activar{% endif %}</button></form>{% endif %}</td></tr>
+    {% endfor %}
+    </tbody></table></div>
+
+  <section class="stack" style="gap:8px" aria-labelledby="pm"><h2 id="pm">Permisos por rol</h2>
+    <div class="table-wrap" role="region" aria-label="Permisos por rol" tabindex="0"><table class="matriz">
+      <caption class="sr-only">Permisos por rol</caption>
+      <thead><tr><th scope="col">Módulo</th><th scope="col">Administrador</th><th scope="col">Recepción</th><th scope="col">Bodega</th><th scope="col">Chofer</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Panel</th><td>Completo</td><td>Mis solicitudes</td><td>Stock y pedidos</td><td>Mis traslados</td></tr>
+        <tr><th scope="row">Solicitudes y salas</th><td>Edita</td><td>Edita</td><td>Sin acceso</td><td>Sin acceso</td></tr>
+        <tr><th scope="row">Traslados</th><td>Edita</td><td>Asigna chofer</td><td>Sin acceso</td><td>Actualiza los suyos</td></tr>
+        <tr><th scope="row">Inventario y pedidos</th><td>Edita</td><td>Sin acceso</td><td>Edita</td><td>Sin acceso</td></tr>
+        <tr><th scope="row">Flota</th><td>Edita</td><td>Sin acceso</td><td>Sin acceso</td><td>Sin acceso</td></tr>
+        <tr><th scope="row">Usuarios y actividad</th><td>Edita</td><td>Sin acceso</td><td>Sin acceso</td><td>Sin acceso</td></tr>
+      </tbody></table></div></section>
+</div>
+{% endblock %}

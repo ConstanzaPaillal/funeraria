@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}{{ object.codigo }}{% endblock %}
+{% block content %}
+{% with s=object %}
+<div class="page-head"><div><h1>{{ s.codigo }} · {{ s.fallecido }}</h1><p>Solicitud de servicio</p></div>
+  <div class="actions">
+    <a class="btn" href="{% url 'venta_create' s.pk %}">Registrar venta</a>
+    <a class="btn btn-secondary" href="{% url 'solicitud_edit' s.pk %}">Editar</a>
+    {% if es_admin %}<a class="btn btn-secondary" href="{% url 'solicitud_delete' s.pk %}">Eliminar</a>{% endif %}
+    <a class="btn btn-secondary" href="{% url 'solicitud_list' %}">Volver al listado</a>
+  </div></div>
+
+<div class="stack">
+  {% if s.estado == 'urgente' %}
+    <div class="aviso aviso--crit">{% icono 'crit' 18 %}<div><p><strong>Ceremonia en menos de 24 horas.</strong> Faltan documentos: pídelos a la familia hoy mismo.</p></div></div>
+  {% elif s.estado == 'docs_pendientes' %}
+    <div class="aviso aviso--warn">{% icono 'warn' 18 %}<div><p>Faltan documentos. Márcalos como entregados cuando los recibas.</p></div></div>
+  {% endif %}
+
+  <div class="grid grid-2">
+    <section class="card" aria-labelledby="d1">
+      <div class="card-head"><h2 id="d1">Datos del servicio</h2>{% insignia s.estado %}</div>
+      <dl class="data">
+        <dt>Servicio</dt><dd>{{ s.get_tipo_servicio_display }}</dd>
+        <dt>Ceremonia</dt><dd>{{ s.ceremonia_inicio|date:"D j M · H:i" }}</dd>
+        <dt>Lugar</dt><dd>{{ s.lugar_ceremonia }}</dd>
+        <dt>Velatorio</dt><dd>{% if s.sala %}{{ s.sala }} · {{ s.velatorio_inicio|date:"j M H:i" }} a {{ s.velatorio_fin|date:"j M H:i" }}{% else %}Sin sala reservada{% endif %}</dd>
+        <dt>Familiar de contacto</dt><dd>{{ s.contacto_nombre }}</dd>
+        <dt>Teléfono</dt><dd>{{ s.contacto_telefono }}</dd>
+        <dt>Correo</dt><dd>{{ s.contacto_email|default:"—" }}</dd>
+        <dt>Responsable</dt><dd>{{ s.responsable.get_full_name|default:s.responsable.username|default:"—" }}</dd>
+        <dt>Féretro elegido</dt><dd>{% if s.feretro %}{{ s.feretro.nombre }} ({{ s.feretro.get_gama_display }}) · {{ s.precio_feretro|clp }}{% else %}Aún sin elegir{% endif %}</dd>
+        <dt>Precio del servicio</dt><dd>{{ s.precio_servicio|clp }}</dd>
+        <dt>Total referencial</dt><dd><strong>{{ s.total_referencial|clp }}</strong> <span class="muted">· facturado {{ s.facturado|clp }}</span></dd>
+      </dl>
+    </section>
+
+    <section class="card" aria-labelledby="d2">
+      <h2 id="d2">Documentos</h2>
+      <ul class="mini-list">
+      {% for d in s.documentos.all %}
+        <li><span>{{ d.get_tipo_display }}</span>
+          <span class="estado-linea">{% if d.entregado %}{% insignia 'entregado' %}{% else %}{% insignia 'pendiente' %}{% endif %}
+            <form method="post" action="{% url 'documento_marcar' s.pk d.pk %}" class="inline">{% csrf_token %}
+              <input type="hidden" name="entregado" value="{% if d.entregado %}0{% else %}1{% endif %}">
+              <button class="btn btn-sm btn-secondary" type="submit">{% if d.entregado %}Marcar pendiente{% else %}Marcar entregado{% endif %}</button></form></span></li>
+      {% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <section class="card" aria-labelledby="d3">
+    <div class="card-head"><h2 id="d3">Avance del servicio</h2>
+      {% if siguiente %}<form method="post" action="{% url 'solicitud_avanzar' s.pk %}" class="inline">{% csrf_token %}<button class="btn" type="submit">Avanzar a «{{ siguiente }}»</button></form>{% endif %}</div>
+    {% include "servicios/_timeline.html" %}
+  </section>
+
+  <div class="grid grid-2">
+    <section class="card" aria-labelledby="d4"><h2 id="d4">Traslados</h2>
+      <ul class="mini-list">{% for t in s.traslados.all %}
+        <li><span><strong>{{ t.codigo }}</strong> · {{ t.inicio|date:"D j M H:i" }}<br><span class="muted">{{ t.ruta }}</span></span>{% insignia t.estado %}</li>
+      {% empty %}<li class="muted">Sin traslados. <a href="{% url 'traslado_create' %}">Programar uno</a>.</li>{% endfor %}</ul></section>
+    <section class="card" aria-labelledby="d5"><h2 id="d5">Pedidos de materiales</h2>
+      <ul class="mini-list">{% for p in s.pedidos.all %}<li><span><strong>{{ p.codigo }}</strong></span>{% insignia p.estado %}</li>
+      {% empty %}<li class="muted">Sin pedidos a bodega.</li>{% endfor %}</ul></section>
+  </div>
+
+  <section class="card" aria-labelledby="d6"><div class="card-head"><h2 id="d6">Ventas</h2><a class="btn btn-sm" href="{% url 'venta_create' s.pk %}">Registrar venta</a></div>
+    <ul class="mini-list">{% for v in s.ventas.all %}
+      <li><span><a href="{% url 'venta_detail' v.pk %}"><strong>{{ v.get_tipo_documento_display }} {{ v.numero }}</strong></a><br><span class="muted">{{ v.cliente_nombre }} · {{ v.creada|date:"j M Y" }}</span></span>
+        <span>{% if v.anulada %}{% insignia 'anulada' %}{% else %}<strong>{{ v.total|clp }}</strong>{% endif %}</span></li>
+    {% empty %}<li class="muted">Todavía no se ha emitido boleta ni factura.</li>{% endfor %}</ul></section>
+
+  <p><a class="btn btn-secondary" href="{% url 'familia' %}">Abrir la consulta de la familia</a>
+     <span class="muted">Código {{ s.codigo }} · verificación: últimos 4 dígitos del teléfono ({{ s.verificacion_familia }}).</span></p>
+</div>
+{% endwith %}
+{% endblock %}

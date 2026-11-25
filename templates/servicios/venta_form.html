@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Registrar venta{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Registrar venta</h1><p>{{ s.codigo }} · en memoria de {{ s.fallecido }}</p></div></div>
+<section class="card wide-form">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="aviso aviso--crit" role="alert" style="margin-bottom:16px">{% icono 'crit' 18 %}<div>{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div></div>{% endif %}
+    {% if formset.non_form_errors %}<div class="aviso aviso--crit" role="alert" style="margin-bottom:16px">{% icono 'crit' 18 %}<div>{% for e in formset.non_form_errors %}<p>{{ e }}</p>{% endfor %}</div></div>{% endif %}
+    <h2>Cliente y documento</h2>
+    <div class="form-grid">{% for field in form %}<div>{% include "servicios/_campo.html" %}</div>{% endfor %}</div>
+    <h2 style="margin-top:24px">Detalle</h2>
+    <p class="muted">Elige lo que se vende. El precio es el vigente del catálogo, con IVA incluido. Marca «Eliminar» para quitar una fila.</p>
+    {{ formset.management_form }}
+    {% for f in formset %}
+      <div class="formset-row">
+        {% for field in f.visible_fields %}{% if field.name != 'DELETE' %}{% include "servicios/_campo.html" %}{% endif %}{% endfor %}
+        {% for field in f.visible_fields %}{% if field.name == 'DELETE' %}<div class="check">{{ field }}<label for="{{ field.id_for_label }}">Eliminar</label></div>{% endif %}{% endfor %}
+        {% for h in f.hidden_fields %}{{ h }}{% endfor %}
+      </div>
+    {% endfor %}
+    <p class="muted">Las filas sin producto elegido se ignoran. Para más unidades del mismo producto, sube la cantidad.</p>
+    <div class="actions" style="margin-top:16px"><button class="btn" type="submit">Emitir documento</button><a class="btn btn-secondary" href="{% url 'solicitud_detail' s.pk %}">Cancelar</a></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Resultado del pago{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Resultado del pago</h1>
+  {% if abono.estado == 'confirmado' %}
+    <div class="aviso aviso--ok">{% icono 'ok' 18 %}<div><p><strong>Pago aprobado.</strong> El abono de {{ abono.monto|clp }} quedó registrado.</p></div></div>
+    <dl class="data" style="margin-top:16px"><dt>Orden</dt><dd>{{ abono.orden_compra }}</dd><dt>Autorización</dt><dd>{{ abono.codigo_autorizacion|default:"—" }}</dd>
+      <dt>Tarjeta</dt><dd>{% if abono.tarjeta_ultimos4 %}terminada en {{ abono.tarjeta_ultimos4 }}{% else %}—{% endif %}</dd></dl>
+  {% elif abono.estado == 'pendiente' %}
+    <div class="aviso aviso--warn">{% icono 'warn' 18 %}<div><p><strong>Aún no podemos confirmar el pago.</strong> No repitas el cobro: espera un momento y verifica de nuevo.</p></div></div>
+    <p style="margin-top:16px"><a class="btn" href="{% url 'webpay_retorno' %}?token_ws={{ abono.token }}" data-no-ajax>Verificar de nuevo</a></p>
+  {% else %}
+    <div class="aviso aviso--crit">{% icono 'crit' 18 %}<div><p><strong>El pago no se realizó.</strong> {{ abono.referencia }}. No se cobró ningún monto.</p></div></div>
+  {% endif %}
+  <p style="margin-top:16px"><a class="btn btn-secondary" href="{% url 'solicitud_detail' abono.solicitud_id %}">Volver a la solicitud {{ abono.solicitud.codigo }}</a></p>
+</section>
+{% endblock %}

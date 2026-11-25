@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}{% if solo_propios %}Mis traslados{% else %}Traslados{% endif %}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{% if solo_propios %}Mis traslados{% else %}Traslados{% endif %}</h1><p>{% if solo_propios %}Tus traslados programados.{% else %}Vehículo y chofer de cada traslado, sin choques de horario.{% endif %}</p></div>
+  {% if not solo_propios %}<a class="btn" href="{% url 'traslado_create' %}">Nuevo traslado</a>{% endif %}</div>
+<div class="table-wrap" role="region" aria-label="Listado de traslados" tabindex="0"><table>
+  <caption class="sr-only">Listado de traslados</caption>
+  <thead><tr><th scope="col">Traslado</th><th scope="col">Ruta</th><th scope="col">Salida</th><th scope="col">Vehículo</th>{% if not solo_propios %}<th scope="col">Chofer</th>{% endif %}<th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+  <tbody>
+  {% for t in object_list %}
+    <tr><td><strong>{{ t.codigo }}</strong><small>{{ t.solicitud.codigo }}</small></td><td>{{ t.ruta }}</td><td>{{ t.inicio|date:"D j M · H:i" }}</td><td>{{ t.vehiculo.nombre }}</td>
+      {% if not solo_propios %}<td>{{ t.chofer.get_full_name|default:t.chofer.username }}</td>{% endif %}
+      <td>{% insignia t.estado %}</td>
+      <td><div class="actions">{% include "servicios/_traslado_acciones.html" %}{% if not solo_propios and t.estado != 'completado' %}<a class="btn btn-sm btn-secondary" href="{% url 'traslado_edit' t.pk %}">Editar</a>{% endif %}</div></td></tr>
+  {% empty %}<tr><td colspan="7" class="empty">No hay traslados.</td></tr>{% endfor %}
+  </tbody></table></div>
+{% include "servicios/_paginacion.html" %}
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Ausencias{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Ausencias del personal</h1><p>Quiénes faltan, quiénes pidieron permiso y qué falta resolver.</p></div>
+  <div class="actions"><a class="btn" href="{% url 'ausencia_create' %}">Registrar ausencia</a><a class="btn btn-secondary" href="{% url 'calendario' %}?tipo=ausencia">Ver en el calendario</a></div></div>
+
+<div class="stack">
+  <section class="card" aria-labelledby="h-hoy">
+    <h2 id="h-hoy">Ausentes hoy</h2>
+    {% if ausentes_hoy %}<ul class="mini-list">{% for a in ausentes_hoy %}
+      <li><span><strong>{{ a.usuario.get_full_name|default:a.usuario.username }}</strong> <span class="muted">· {{ a.get_tipo_display }} hasta el {{ a.hasta|date:"j M" }}</span></span></li>{% endfor %}</ul>
+    {% else %}<p class="muted" style="margin:0">Hoy nadie está ausente.</p>{% endif %}
+  </section>
+
+  <section aria-labelledby="h-pend"><h2 id="h-pend">Por revisar{% if pendientes %} ({{ pendientes|length }}){% endif %}</h2>
+    <div class="table-wrap" role="region" aria-label="Solicitudes pendientes" tabindex="0"><table>
+      <caption class="sr-only">Solicitudes de ausencia pendientes</caption>
+      <thead><tr><th scope="col">Persona</th><th scope="col">Tipo</th><th scope="col">Fechas</th><th scope="col">Decisión</th></tr></thead>
+      <tbody>
+      {% for a in pendientes %}
+        <tr><td><strong>{{ a.usuario.get_full_name|default:a.usuario.username }}</strong></td>
+          <td>{{ a.get_tipo_display }}{% if a.motivo %}<small>{{ a.motivo }}</small>{% endif %}</td>
+          <td>{{ a.desde|date:"D j M" }} al {{ a.hasta|date:"D j M Y" }}<small>{{ a.dias }} día{{ a.dias|pluralize }}</small></td>
+          <td>{% include "servicios/_ausencia_decision.html" %}</td></tr>
+      {% empty %}<tr><td colspan="4" class="empty">No hay solicitudes por revisar.</td></tr>{% endfor %}
+      </tbody></table></div></section>
+
+  <section aria-labelledby="h-hist"><h2 id="h-hist">Historial</h2>
+    <form method="get" class="filters" role="search" aria-label="Filtrar ausencias">
+      <div class="field"><label for="persona">Persona</label><select id="persona" name="persona"><option value="">Todas</option>
+        {% for u in personas %}<option value="{{ u.pk }}"{% if persona_sel == u.pk|stringformat:"s" %} selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select></div>
+      <div class="field"><label for="estado">Estado</label><select id="estado" name="estado"><option value="">Todos</option>
+        {% for k, l in estados %}<option value="{{ k }}"{% if estado_sel == k %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+      <div class="actions filters-actions"><button class="btn" type="submit">Filtrar</button></div>
+    </form>
+    <div class="table-wrap" role="region" aria-label="Historial de ausencias" tabindex="0"><table>
+      <caption class="sr-only">Historial de ausencias</caption>
+      <thead><tr><th scope="col">Persona</th><th scope="col">Tipo</th><th scope="col">Fechas</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+      <tbody>
+      {% for a in object_list %}
+        <tr><td><strong>{{ a.usuario.get_full_name|default:a.usuario.username }}</strong></td>
+          <td>{{ a.get_tipo_display }}{% if a.motivo %}<small>{{ a.motivo }}</small>{% endif %}</td>
+          <td>{{ a.desde|date:"D j M" }} al {{ a.hasta|date:"D j M Y" }}<small>{{ a.dias }} día{{ a.dias|pluralize }}</small></td>
+          <td>{% insignia a.estado %}{% if a.comentario %}<small>{{ a.comentario }}</small>{% endif %}</td>
+          <td><form method="post" action="{% url 'ausencia_cancelar' a.pk %}" class="inline" data-confirmar="¿Eliminar esta ausencia?">{% csrf_token %}<button class="btn btn-sm btn-secondary" type="submit">Eliminar</button></form></td></tr>
+      {% empty %}<tr><td colspan="5" class="empty">No hay ausencias registradas.</td></tr>{% endfor %}
+      </tbody></table></div>
+    {% include "servicios/_paginacion.html" %}
+  </section>
+</div>
+{% endblock %}

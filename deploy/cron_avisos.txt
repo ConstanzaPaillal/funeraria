@@ -1,0 +1,3 @@
+# Aviso diario por correo a las familias con documentos pendientes, a las 08:00
+# (instalar con: crontab -e). Ajusta la ruta si clonaste el proyecto en otro lugar.
+0 8 * * * cd $HOME/cristorey && set -a && . ./.env && set +a && ./venv/bin/python manage.py avisar_documentos >> $HOME/avisos.log 2>&1

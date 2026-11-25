@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Tarifas de servicios{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Tarifas de servicios</h1></div>
+<section class="card wide-form"><form method="post" novalidate>{% csrf_token %}{{ formset.management_form }}
+  <p class="muted">Precio en pesos chilenos, con IVA incluido.</p>
+  {% for f in formset %}
+    {% for h in f.hidden_fields %}{{ h }}{% endfor %}
+    <div class="field {% if f.precio.errors %}has-error{% endif %}"><label for="{{ f.precio.id_for_label }}">{{ f.instance.get_tipo_servicio_display }}</label>{{ f.precio }}
+      {% for e in f.precio.errors %}<p class="error" role="alert">{% icono 'crit' 16 %}<span>{{ e }}</span></p>{% endfor %}</div>
+  {% endfor %}
+  <div class="actions" style="margin-top:16px"><button class="btn" type="submit">Guardar</button><a class="btn btn-secondary" href="{% url 'precios' %}">Cancelar</a></div>
+</form></section>
+{% endblock %}

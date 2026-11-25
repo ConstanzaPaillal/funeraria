@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Ingreso{% endblock %}
+{% block content %}
+<div class="login-hero">
+  <div class="cross" aria-hidden="true"><svg width="36" height="36" viewBox="0 0 28 28" focusable="false" style="color:var(--brand-text)"><path d="M12 2h4v7h7v4h-7v13h-4V13H5V9h7z" fill="currentColor"/></svg></div>
+  <h1>Cristo Rey</h1>
+  <p>Sistema de gestión de servicios funerarios</p>
+</div>
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="t-staff">
+    <h2 id="t-staff">Personal de la funeraria</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="aviso aviso--crit" role="alert" style="margin-bottom:16px">{% icono 'crit' 18 %}<div><p>Usuario o contraseña incorrectos. Revisa los datos e inténtalo de nuevo.</p></div></div>
+      {% endif %}
+      <div class="field"><label for="id_username">Usuario</label><input type="text" name="username" id="id_username" autocomplete="username" autofocus required></div>
+      <div class="field"><label for="id_password">Contraseña</label><input type="password" name="password" id="id_password" autocomplete="current-password" required></div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn" type="submit">Ingresar</button>
+    </form>
+  </section>
+  <section class="card" aria-labelledby="t-fam">
+    <h2 id="t-fam">Soy familiar</h2>
+    <p class="muted">Con el código que le entregó nuestro equipo puede ver cómo avanza el servicio.</p>
+    <a class="btn btn-secondary" href="{% url 'familia' %}">Consultar un servicio</a>
+  </section>
+</div>
+{% endblock %}

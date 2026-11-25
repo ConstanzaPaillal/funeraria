@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Pedidos de bodega{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Pedidos de bodega</h1><p>Materiales que necesita cada servicio.</p></div>
+  <a class="btn" href="{% url 'pedido_create' %}">Nuevo pedido</a></div>
+<div class="table-wrap" role="region" aria-label="Pedidos de bodega" tabindex="0"><table>
+  <caption class="sr-only">Pedidos de bodega</caption>
+  <thead><tr><th scope="col">Pedido</th><th scope="col">Solicitud</th><th scope="col">Materiales</th><th scope="col">Para la ceremonia</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+  <tbody>
+  {% for p in object_list %}
+    <tr><td><strong>{{ p.codigo }}</strong></td><td>{{ p.solicitud.codigo }}<small>{{ p.solicitud.fallecido }}</small></td>
+      <td><ul style="margin:0;padding-left:16px">{% for i in p.items.all %}<li>{{ i.cantidad }} × {{ i.articulo.nombre }}</li>{% endfor %}</ul></td>
+      <td>{{ p.solicitud.ceremonia_inicio|date:"D j M · H:i" }}</td><td>{% insignia p.estado %}</td>
+      <td>{% if p.estado == 'pendiente' %}<form method="post" action="{% url 'pedido_entregar' p.pk %}" class="inline">{% csrf_token %}<button class="btn btn-sm" type="submit">Preparar y entregar</button></form>{% else %}<span class="muted">Sin acciones</span>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="empty">No hay pedidos.</td></tr>{% endfor %}
+  </tbody></table></div>
+{% include "servicios/_paginacion.html" %}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Precios{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Precios</h1><p>Valores de venta en pesos chilenos, con IVA incluido.</p></div>
+  <div class="actions">{% if es_bodega %}<a class="btn btn-secondary" href="{% url 'articulo_list' %}">Editar precios de artículos</a>{% endif %}
+    {% if puede_editar_tarifas %}<a class="btn" href="{% url 'tarifas_editar' %}">Editar tarifas de servicios</a>{% endif %}</div></div>
+<div class="stack">
+  <section class="card" aria-labelledby="p1"><h2 id="p1">Féretros</h2>
+    <div class="gamas">
+      {% for a in feretros %}<div class="gama"><span class="gama-n">{{ a.get_gama_display|default:"Sin gama" }}</span><strong class="gama-p">{{ a.precio|clp }}</strong><span class="muted">{{ a.nombre }}</span></div>
+      {% empty %}<p class="muted">Aún no hay féretros en el catálogo.</p>{% endfor %}
+    </div></section>
+  <section class="card" aria-labelledby="p2"><h2 id="p2">Servicios</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Tarifas de servicios"><table><thead><tr><th scope="col">Servicio</th><th scope="col" class="num">Precio</th></tr></thead><tbody>
+      {% for t in tarifas %}<tr><td>{{ t.get_tipo_servicio_display }}</td><td class="num">{{ t.precio|clp }}</td></tr>{% empty %}<tr><td colspan="2" class="empty">Sin tarifas.</td></tr>{% endfor %}</tbody></table></div></section>
+  <section class="card" aria-labelledby="p3"><h2 id="p3">Otros artículos</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Otros artículos con precio"><table><thead><tr><th scope="col">Artículo</th><th scope="col">Categoría</th><th scope="col" class="num">Precio</th></tr></thead><tbody>
+      {% for a in otros %}<tr><td>{{ a.nombre }}</td><td>{{ a.get_categoria_display }}</td><td class="num">{{ a.precio|clp }}</td></tr>{% empty %}<tr><td colspan="3" class="empty">Sin artículos con precio.</td></tr>{% endfor %}</tbody></table></div></section>
+</div>
+{% endblock %}

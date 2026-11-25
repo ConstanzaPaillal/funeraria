@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Fotos de {{ articulo.nombre }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Fotos de {{ articulo.nombre }}</h1>
+  <p>{% if articulo.medidas %}Medidas: {{ articulo.medidas }}.{% else %}Sin medidas registradas.{% endif %} La foto principal se cambia en «Editar».</p></div>
+  <div class="actions"><a class="btn btn-secondary" href="{% url 'articulo_edit' articulo.pk %}">Editar artículo</a><a class="btn btn-secondary" href="{% url 'articulo_list' %}">Volver al inventario</a></div></div>
+<div class="stack">
+  <section class="card" aria-labelledby="g1"><h2 id="g1">Galería</h2>
+    <ul class="galeria">
+      {% if articulo.imagen %}<li><img src="{{ articulo.imagen.url }}" alt="Foto principal de {{ articulo.nombre }}"><span class="muted">Foto principal</span></li>{% endif %}
+      {% for f in articulo.fotos.all %}
+        <li><img src="{{ f.imagen.url }}" alt="{{ f.descripcion|default:'Foto adicional' }}"><span class="muted">{{ f.descripcion|default:"Foto adicional" }}</span>
+          <form method="post" action="{% url 'articulo_foto_eliminar' articulo.pk f.pk %}" data-confirmar="¿Eliminar esta foto?">{% csrf_token %}<button class="btn btn-sm btn-secondary" type="submit">Eliminar</button></form></li>
+      {% endfor %}
+    </ul>
+    {% if not articulo.imagen and not articulo.fotos.all %}<p class="muted">Todavía no hay fotos. En el sitio público se muestra una ilustración.</p>{% endif %}
+  </section>
+  <section class="card narrow" aria-labelledby="g2"><h2 id="g2">Agregar una foto</h2>
+    <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+      {% if form.non_field_errors %}<div class="aviso aviso--crit" role="alert" style="margin-bottom:16px">{% icono 'crit' 18 %}<div>{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div></div>{% endif %}
+      {% for field in form %}{% include "servicios/_campo.html" %}{% endfor %}
+      <button class="btn" type="submit">Subir foto</button>
+    </form></section>
+</div>
+{% endblock %}

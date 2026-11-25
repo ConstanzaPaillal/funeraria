@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Mis ausencias{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Mis ausencias</h1><p>Pide un permiso o vacaciones. El administrador te responderá aquí.</p></div></div>
+<div class="grid grid-2">
+  <section class="card" aria-labelledby="a-nueva">
+    <h2 id="a-nueva">Pedir una ausencia</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="aviso aviso--crit" role="alert" style="margin-bottom:16px">{% icono 'crit' 18 %}<div>{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div></div>{% endif %}
+      {% for field in form %}{% include "servicios/_campo.html" %}{% endfor %}
+      <div class="actions"><button class="btn" type="submit">Enviar solicitud</button></div>
+    </form>
+  </section>
+  <section class="card" aria-labelledby="a-lista">
+    <h2 id="a-lista">Mis solicitudes</h2>
+    <ul class="mini-list">
+    {% for a in mias %}
+      <li><span><strong>{{ a.get_tipo_display }}</strong> · {{ a.desde|date:"j M" }} al {{ a.hasta|date:"j M Y" }}<br>
+          <span class="muted">{{ a.dias }} día{{ a.dias|pluralize }}{% if a.motivo %} · {{ a.motivo }}{% endif %}{% if a.comentario %} · Admin: {{ a.comentario }}{% endif %}</span></span>
+        <span class="estado-linea">{% insignia a.estado %}
+          {% if a.estado == 'pendiente' %}<form method="post" action="{% url 'ausencia_cancelar' a.pk %}" class="inline">{% csrf_token %}<button class="btn btn-sm btn-secondary" type="submit">Retirar</button></form>{% endif %}</span></li>
+    {% empty %}<li class="muted">Todavía no has pedido ausencias.</li>{% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

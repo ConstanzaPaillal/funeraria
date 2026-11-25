@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Salas de velatorio{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Salas de velatorio</h1><p>Reservas vigentes y próximas. El sistema no permite dos velatorios en la misma sala y horario.</p></div></div>
+<div class="grid grid-2">
+{% for sala, reservas in por_sala.items %}
+  <section class="card" aria-labelledby="sala-{{ sala.pk }}">
+    <div class="card-head"><h2 id="sala-{{ sala.pk }}">{{ sala.nombre }}</h2><span class="muted">Capacidad: {{ sala.capacidad }} personas</span></div>
+    <ul class="mini-list">
+    {% for r in reservas %}
+      <li><span><a href="{% url 'solicitud_detail' r.pk %}"><strong>{{ r.codigo }}</strong></a> · {{ r.fallecido }}<br><span class="muted">{{ r.velatorio_inicio|date:"D j M H:i" }} a {{ r.velatorio_fin|date:"D j M H:i" }}</span></span></li>
+    {% empty %}<li class="muted">Sin reservas próximas: disponible.</li>{% endfor %}
+    </ul>
+  </section>
+{% empty %}<p class="empty card">No hay salas activas. El administrador puede crearlas en Administración.</p>{% endfor %}
+</div>
+{% endblock %}

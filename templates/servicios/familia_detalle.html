@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}Servicio {{ s.codigo }}{% endblock %}
+{% block content %}
+<div class="narrow" style="margin:0 auto">
+  <div class="family-title"><p>Servicio en memoria de</p><h1 class="memoria">{{ s.fallecido }}</h1><p>Solicitud {{ s.codigo }}</p></div>
+  <div class="stack">
+    <section class="card" aria-labelledby="f-est">
+      <div class="card-head"><h2 id="f-est">Estado del servicio</h2>{% insignia s.estado %}</div>
+      <p>{{ mensaje }}</p>
+      {% include "servicios/_timeline.html" %}
+    </section>
+    <section class="card" aria-labelledby="f-cer"><h2 id="f-cer">Ceremonia</h2>
+      <dl class="data"><dt>Fecha y hora</dt><dd>{{ s.ceremonia_inicio|date:"l j \d\e F · H:i" }}</dd><dt>Lugar</dt><dd>{{ s.lugar_ceremonia }}</dd>
+        <dt>Velatorio</dt><dd>{% if s.sala %}{{ s.sala }}, Cristo Rey{% else %}Por confirmar{% endif %}</dd><dt>Servicio</dt><dd>{{ s.get_tipo_servicio_display }}</dd></dl></section>
+    <section class="card" aria-labelledby="f-doc"><h2 id="f-doc">Documentos</h2>
+      <ul class="mini-list">{% for d in s.documentos.all %}<li><span>{{ d.get_tipo_display }}</span>{% if d.entregado %}{% insignia 'entregado' %}{% else %}{% insignia 'pendiente' %}{% endif %}</li>{% endfor %}</ul></section>
+    <section class="card" aria-labelledby="f-con"><h2 id="f-con">Quién le atiende</h2>
+      <p><strong>{{ s.responsable.get_full_name|default:"Equipo de recepción" }}</strong><br><span class="muted">Recepción, Cristo Rey · +56 45 255 0100</span></p></section>
+    <p><a class="btn btn-secondary" href="{% url 'familia' %}">Consultar otro servicio</a></p>
+  </div>
+</div>
+{% endblock %}

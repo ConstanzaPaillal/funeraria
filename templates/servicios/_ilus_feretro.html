@@ -1,0 +1,12 @@
+<svg class="ilus" viewBox="0 0 240 120" role="img" aria-label="Ilustración de un féretro {{ gama }}" focusable="false">
+  <polygon points="10,60 50,16 170,16 230,46 230,74 170,104 50,104" class="f-cuerpo {% if gama == 'premium' %}f-oscuro{% endif %}"/>
+  <polygon points="26,60 56,28 166,28 216,50 216,70 166,92 56,92" class="f-tapa"/>
+  {% if gama != 'basico' %}
+    <rect x="72" y="10" width="26" height="6" rx="3" class="f-herraje"/><rect x="128" y="10" width="26" height="6" rx="3" class="f-herraje"/>
+    <rect x="72" y="104" width="26" height="6" rx="3" class="f-herraje"/><rect x="128" y="104" width="26" height="6" rx="3" class="f-herraje"/>
+  {% endif %}
+  {% if gama == 'premium' %}
+    <polygon points="40,60 62,38 162,38 204,54 204,66 162,82 62,82" class="f-marco"/>
+    <path d="M108 46h8v10h10v8h-10v14h-8V64H98v-8h10z" class="f-herraje f-cruz"/>
+  {% endif %}
+</svg>

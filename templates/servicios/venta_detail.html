@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load cristorey_tags %}
+{% block title %}{{ v.get_tipo_documento_display }} {{ v.numero }}{% endblock %}
+{% block content %}
+<div class="page-head no-print"><div><h1>{{ v.get_tipo_documento_display }} {{ v.numero }}</h1><p>{% if v.anulada %}Documento anulado.{% else %}Emitida correctamente.{% endif %}</p></div>
+  <div class="actions">
+    <a class="btn" href="{% url 'venta_pdf' v.pk %}" target="_blank" rel="noopener">Descargar PDF</a>
+    <button class="btn btn-secondary" type="button" data-imprimir>Imprimir</button>
+    {% if es_admin and not v.anulada %}<form method="post" action="{% url 'venta_anular' v.pk %}" class="inline" data-confirmar="¿Anular este documento? No se puede deshacer.">{% csrf_token %}<button class="btn btn-secondary" type="submit">Anular</button></form>{% endif %}
+    <a class="btn btn-secondary" href="{% url 'solicitud_detail' v.solicitud_id %}">Volver a la solicitud</a></div></div>
+
+<article class="documento card" aria-label="{{ v.get_tipo_documento_display }} {{ v.numero }}">
+  {% if v.anulada %}<p class="doc-anulada">DOCUMENTO ANULADO</p>{% endif %}
+  <header class="doc-cab">
+    <div><strong class="doc-emisor">{{ empresa.razon_social }}</strong><br>Giro: {{ empresa.giro }}<br>{{ empresa.direccion }}<br>Tel. {{ empresa.telefono }}</div>
+    <div class="doc-caja"><span>R.U.T.: {{ empresa.rut }}</span><strong>{{ v.get_tipo_documento_display|upper }}</strong><span>N° {{ v.numero }}</span></div>
+  </header>
+  <dl class="data doc-cliente">
+    <dt>Cliente</dt><dd>{{ v.cliente_nombre }}</dd>
+    {% if v.cliente_rut %}<dt>RUT</dt><dd>{{ v.cliente_rut }}</dd>{% endif %}
+    {% if v.tipo_documento == 'factura' %}<dt>Giro</dt><dd>{{ v.cliente_giro }}</dd><dt>Dirección</dt><dd>{{ v.cliente_direccion }}</dd>{% endif %}
+    <dt>Fecha de emisión</dt><dd>{{ v.creada|date:"j \d\e F \d\e Y · H:i" }}</dd>
+    <dt>Servicio</dt><dd>{{ v.solicitud.codigo }} · en memoria de {{ v.solicitud.fallecido }}</dd>
+    <dt>Forma de pago</dt><dd>{{ v.get_forma_pago_display }}</dd>
+    <dt>Emitida por</dt><dd>{{ v.creada_por.get_full_name|default:v.creada_por.username|default:"—" }}</dd>
+  </dl>
+  <div class="table-wrap"><table>
+    <caption class="sr-only">Detalle</caption>
+    <thead><tr><th scope="col">Descripción</th><th scope="col" class="num">Cant.</th><th scope="col" class="num">Precio unit.</th><th scope="col" class="num">Total</th></tr></thead>
+    <tbody>{% for i in v.items.all %}<tr><td>{{ i.descripcion }}</td><td class="num">{{ i.cantidad }}</td><td class="num">{{ i.precio_unitario|clp }}</td><td class="num">{{ i.subtotal|clp }}</td></tr>{% endfor %}</tbody></table></div>
+  <dl class="doc-totales"><dt>Neto</dt><dd>{{ v.neto|clp }}</dd><dt>IVA (19 %)</dt><dd>{{ v.iva|clp }}</dd><dt class="total">Total</dt><dd class="total">{{ v.total|clp }}</dd></dl>
+  <p class="doc-nota muted">Comprobante interno del sistema de gestión de Cristo Rey. No reemplaza al documento tributario electrónico (DTE) que debe emitirse ante el SII.</p>
+</article>
+{% endblock %}
